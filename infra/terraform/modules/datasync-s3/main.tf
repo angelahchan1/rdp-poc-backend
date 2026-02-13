@@ -2,7 +2,7 @@ module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 5.0"
 
-  bucket = "${local.project_prefix}-datasync-destination"
+  bucket = "${var.project_prefix}-datasync-destination"
 
   control_object_ownership = true
   object_ownership         = "BucketOwnerEnforced"
@@ -21,7 +21,7 @@ module "datasync_s3_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role"
   version = "~> 6.0"
 
-  name = "${local.project_prefix}-datasync-s3-role"
+  name = "${var.project_prefix}-datasync-s3-role"
 
   trust_policy_permissions = {
     DataSyncService = {
@@ -36,13 +36,13 @@ module "datasync_s3_role" {
         {
           test     = "StringEquals"
           variable = "aws:SourceAccount"
-          values   = [local.account_id]
+          values   = [var.account_id]
         },
         {
           test     = "ArnLike"
           variable = "aws:SourceArn"
           values = [
-            "arn:aws:datasync:${local.region_id}:${local.account_id}:*"
+            "arn:aws:datasync:${var.region_id}:${var.account_id}:*"
           ]
         }
       ]
@@ -83,15 +83,15 @@ module "datasync_s3_role" {
 }
 
 resource "aws_datasync_agent" "smb_agent" {
-  name           = "${local.project_prefix}-smb-agent"
+  name           = "${var.project_prefix}-smb-agent"
   activation_key = var.datasync_activation_key
 }
 
 resource "aws_datasync_location_smb" "source" {
-  server_hostname = var.smb_server_ip
-  subdirectory    = var.smb_subdirectory
-  user            = var.smb_username
-  password        = var.smb_password
+  server_hostname = var.smb.erver_ip
+  subdirectory    = var.smb.subdirectory
+  user            = var.smb.username
+  password        = var.smb.password
   agent_arns      = [aws_datasync_agent.smb_agent.arn]
 }
 
@@ -110,12 +110,12 @@ resource "aws_datasync_location_s3" "destination" {
 }
 
 resource "aws_cloudwatch_log_group" "datasync_logs" {
-  name              = "/aws/datasync/${local.project_prefix}-task"
+  name              = "/aws/datasync/${var.project_prefix}-task"
   retention_in_days = 7
 }
 
 resource "aws_datasync_task" "sync_task" {
-  name                     = "${local.project_prefix}-smb-to-s3"
+  name                     = "${var.project_prefix}-smb-to-s3"
   source_location_arn      = aws_datasync_location_smb.source.arn
   destination_location_arn = aws_datasync_location_s3.destination.arn
   cloudwatch_log_group_arn = "${aws_cloudwatch_log_group.datasync_logs.arn}:*"
