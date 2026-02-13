@@ -88,7 +88,7 @@ resource "aws_datasync_agent" "smb_agent" {
 }
 
 resource "aws_datasync_location_smb" "source" {
-  server_hostname = var.smb.erver_ip
+  server_hostname = var.smb.server_ip
   subdirectory    = var.smb.subdirectory
   user            = var.smb.username
   password        = var.smb.password
