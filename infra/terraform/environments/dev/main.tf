@@ -78,7 +78,7 @@ module "vpc_endpoints" {
   )
 }
 
-module "datasync_pipeline" {
+module "datasync_s3" {
   source = "../../modules/datasync-s3"
 
   project_prefix = local.project_prefix
@@ -89,3 +89,4 @@ module "datasync_pipeline" {
 
   smb_config = var.smb_config
 }
+
