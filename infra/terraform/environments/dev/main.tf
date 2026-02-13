@@ -11,17 +11,6 @@ module "vpc" {
   enable_nat_gateway   = true
   single_nat_gateway   = true
 
-
-  public_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                      = "1"
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"             = "1"
-  }
-
 }
 
 
@@ -56,26 +45,18 @@ module "vpc_endpoints" {
   subnet_ids         = module.vpc.private_subnets
   security_group_ids = [module.vpc_endpoint_sg.security_group_id]
 
-  endpoints = merge(
-    {
-      s3 = {
-        service         = "s3"
-        service_type    = "Gateway"
-        route_table_ids = module.vpc.private_route_table_ids
-      }
-      sts   = { service = "sts", private_dns_enabled = true }
-      batch = { service = "batch", private_dns_enabled = true }
-      logs  = { service = "logs", private_dns_enabled = true }
-    },
-
-    var.enable_cluster_connectivity ? {
-      ecr_api  = { service = "ecr.api", private_dns_enabled = true }
-      ecr_dkr  = { service = "ecr.dkr", private_dns_enabled = true }
-      ec2      = { service = "ec2", private_dns_enabled = true }
-      eks      = { service = "eks", private_dns_enabled = true }
-      eks_auth = { service = "eks-auth", private_dns_enabled = true }
-    } : {}
-  )
+  endpoints = {
+    s3 = {
+      service         = "s3"
+      service_type    = "Gateway"
+      route_table_ids = module.vpc.private_route_table_ids
+    }
+    ecr_api = { service = "ecr.api", private_dns_enabled = true }
+    ecr_dkr = { service = "ecr.dkr", private_dns_enabled = true }
+    logs    = { service = "logs", private_dns_enabled = true }
+    sts     = { service = "sts", private_dns_enabled = true }
+    batch   = { service = "batch", private_dns_enabled = true }
+  }
 }
 
 module "datasync_s3" {

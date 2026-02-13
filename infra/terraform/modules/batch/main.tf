@@ -8,7 +8,7 @@ module "eventbridge" {
 
   rules = {
     datasync_trigger = {
-      description = "Trigger StepFumction after DataSync task success"
+      description = "Trigger StepFunction after DataSync task success"
       enabled     = true
 
       event_pattern = jsonencode({
@@ -26,17 +26,17 @@ module "eventbridge" {
     datasync_trigger = [
       {
         name            = "trigger-batch-step-function"
-        arn             = module.inference_orchestrator.state_machine_arn
+        arn             = module.step_function.state_machine_arn
         attach_role_arn = true
       }
     ]
   }
   attach_sfn_policy = true
-  sfn_target_arns   = [module.inference_orchestrator.state_machine_arn]
+  sfn_target_arns   = [module.step_function.state_machine_arn]
 }
 
 
-module "inference_orchestrator" {
+module "step_function" {
   source  = "terraform-aws-modules/step-functions/aws"
   version = "~> 5.0"
 

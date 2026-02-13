@@ -10,11 +10,6 @@ variable "project_name" {
   default     = "rdp" #short for rail defect poc
 }
 
-variable "enable_cluster_connectivity" {
-  type        = bool
-  default     = false
-  description = "If true, provisions ECR/EKS/EC2 endpoints."
-}
 
 variable "datasync_activation_key" {
   description = "The activation key for the data sync agent"
