@@ -72,21 +72,6 @@ module "vpc_endpoints" {
 # }
 
 
-# module "image_batch_processor" {
-#   source          = "./modules/batch"
-#   project_prefix  = local.project_prefix
-#   account_id      = local.account_id
-#   region_id       = local.region_id
-#   repository_name = local.repository_name
-
-#   source_bucket_arn = aws_s3_bucket.images.arn
-#   source_bucket_id  = aws_s3_bucket.images.id
-#   datasync_task_arn = aws_datasync_task.this.arn
-
-#   vpc_id          = module.vpc.vpc_id
-#   private_subnets = module.vpc.private_subnets
-# }
-
 module "image_batch_processor" {
   source          = "./modules/batch"
   project_prefix  = local.project_prefix
@@ -94,9 +79,9 @@ module "image_batch_processor" {
   region_id       = local.region_id
   repository_name = local.repository_name
 
-  source_bucket_arn = aws_s3_bucket.images.arn
-  source_bucket_id  = aws_s3_bucket.images.id
-  datasync_task_arn = aws_datasync_task.this.arn
+  source_bucket_arn = module.datasync_s3.s3_bucket_id
+  source_bucket_id  = module.datasync_s3.s3_bucket_arn
+  datasync_task_arn = module.datasync_s3.datasync_task_arn
 
   vpc_id          = module.vpc.vpc_id
   private_subnets = module.vpc.private_subnets
