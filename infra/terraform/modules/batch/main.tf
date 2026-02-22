@@ -16,7 +16,7 @@ module "eventbridge" {
         "detail-type" : ["DataSync Task Execution State Change"],
         "resources" : [{ "prefix" : var.datasync_task_arn }],
         "detail" : {
-          "Status" : ["SUCCESS"]
+          "State" : ["SUCCESS"]
         }
       })
     }
@@ -68,9 +68,11 @@ module "step_function" {
               Type     = "Task"
               Resource = "arn:aws:states:::batch:submitJob.sync"
               Parameters = {
-                JobName       = "ImageProcessor"
-                JobQueue      = module.batch.job_queues["fargate_queue"].arn
-                JobDefinition = module.batch.job_definitions["inference_job"].arn
+                JobName                    = "ImageProcessor"
+                JobQueue                   = module.batch.job_queues["fargate_queue"].arn
+                JobDefinition              = module.batch.job_definitions["inference_job"].arn
+                SchedulingPriorityOverride = 1,
+                ShareIdentifier            = "default"
                 ContainerOverrides = {
                   Environment = [
                     {
@@ -110,7 +112,9 @@ module "step_function" {
   }
 
   service_integrations = {
-    batch = { batch = true }
+    batch_Sync = {
+      events = true
+    }
   }
 }
 
@@ -130,8 +134,8 @@ module "batch" {
       compute_resources = {
         type               = "FARGATE_SPOT"
         max_vcpus          = 2
-        security_group_ids = [module.vpc.default_security_group_id]
-        subnets            = module.vpc.private_subnets
+        security_group_ids = var.vpc_security_group_ids
+        subnets            = var.private_subnets
       }
     }
   }
@@ -142,6 +146,11 @@ module "batch" {
       state                = "ENABLED"
       priority             = 1
       compute_environments = ["fargate"]
+      compute_environment_order = {
+        0 = {
+          compute_environment_key = "fargate"
+        }
+      }
     }
   }
 
@@ -159,18 +168,15 @@ module "batch" {
         executionRoleArn = module.batch_exec_role.iam_role_arn
         jobRoleArn       = module.batch_job_role.iam_role_arn
       })
-      retry_strategy = {
-        attempts = 2
-        evaluate_on_exit = [
-          {
-            action       = "RETRY"
-            on_exit_code = "1"
-          },
-          {
-            action       = "EXIT"
-            on_exit_code = "0"
-          }
-        ]
+      evaluate_on_exit = {
+        retry_on_failure = {
+          action       = "RETRY"
+          on_exit_code = "1"
+        }
+        exit_on_success = {
+          action       = "EXIT"
+          on_exit_code = "0"
+        }
       }
     }
   }

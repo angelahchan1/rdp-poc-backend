@@ -73,16 +73,16 @@ module "vpc_endpoints" {
 
 
 module "image_batch_processor" {
-  source          = "./modules/batch"
+  source          = "../../modules/batch"
   project_prefix  = local.project_prefix
   account_id      = local.account_id
   region_id       = local.region_id
   repository_name = local.repository_name
 
-  source_bucket_arn = module.datasync_s3.s3_bucket_id
-  source_bucket_id  = module.datasync_s3.s3_bucket_arn
-  datasync_task_arn = module.datasync_s3.datasync_task_arn
+  source_bucket_arn = "arn:aws:s3:::rdp-dev-datasync-destination"
+  source_bucket_id  = "rdp-dev-datasync-destination"
+  datasync_task_arn = "arn:aws:datasync:ap-southeast-2:977938986999:task/task-04ec35fc603ecc170"
 
-  vpc_id          = module.vpc.vpc_id
-  private_subnets = module.vpc.private_subnets
+  private_subnets        = module.vpc.private_subnets
+  vpc_security_group_ids = [module.vpc.default_security_group_id]
 }
