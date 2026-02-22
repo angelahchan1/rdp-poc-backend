@@ -4,6 +4,5 @@ locals {
   region_id       = data.aws_region.current.id
   partition       = data.aws_partition.current.partition
   repository_name = "rail-defect-poc-api"
-  cluster_name    = "${local.project_prefix}-cluster"
 
 }

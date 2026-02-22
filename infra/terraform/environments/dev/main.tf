@@ -59,15 +59,45 @@ module "vpc_endpoints" {
   }
 }
 
-module "datasync_s3" {
-  source = "../../modules/datasync-s3"
+# module "datasync_s3" {
+#   source = "../../modules/datasync-s3"
 
-  project_prefix = local.project_prefix
-  account_id     = local.account_id
-  region_id      = local.region_id
+#   project_prefix = local.project_prefix
+#   account_id     = local.account_id
+#   region_id      = local.region_id
 
-  datasync_activation_key = var.datasync_activation_key
+#   datasync_activation_key = var.datasync_activation_key
 
-  smb_config = var.smb_config
+#   smb_config = var.smb_config
+# }
+
+
+# module "image_batch_processor" {
+#   source          = "./modules/batch"
+#   project_prefix  = local.project_prefix
+#   account_id      = local.account_id
+#   region_id       = local.region_id
+#   repository_name = local.repository_name
+
+#   source_bucket_arn = aws_s3_bucket.images.arn
+#   source_bucket_id  = aws_s3_bucket.images.id
+#   datasync_task_arn = aws_datasync_task.this.arn
+
+#   vpc_id          = module.vpc.vpc_id
+#   private_subnets = module.vpc.private_subnets
+# }
+
+module "image_batch_processor" {
+  source          = "./modules/batch"
+  project_prefix  = local.project_prefix
+  account_id      = local.account_id
+  region_id       = local.region_id
+  repository_name = local.repository_name
+
+  source_bucket_arn = aws_s3_bucket.images.arn
+  source_bucket_id  = aws_s3_bucket.images.id
+  datasync_task_arn = aws_datasync_task.this.arn
+
+  vpc_id          = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets
 }
-
