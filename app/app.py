@@ -12,7 +12,7 @@ if not batch_payload:
     sys.exit(1)
 
 try:
-    files_to_process = json.loads(batch_payload)
+    files_to_process = json.loads(batch_payload)["Items"]
     print(f"Successfully parsed batch payload. Found {len(files_to_process)} files.")
     
     # 2. Print out the files to prove the plumbing works

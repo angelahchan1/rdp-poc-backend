@@ -19,10 +19,9 @@ module "vpc_endpoint_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = "${local.project_prefix}-eks-vpce-sg"
-  description = "Allows 443 traffic from EKS cluster"
+  name        = "${local.project_prefix}-vpce-sg"
+  description = "Allows 443 traffic from within VPC to VPC endpoints"
   vpc_id      = module.vpc.vpc_id
-
 
   ingress_with_cidr_blocks = [
     {
@@ -33,6 +32,17 @@ module "vpc_endpoint_sg" {
       cidr_blocks = module.vpc.vpc_cidr_block
     },
   ]
+  egress_rules = ["all-all"]
+}
+
+module "batch_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
+
+  name        = "${local.project_prefix}-batch-sg"
+  description = "Security group for Batch Fargate tasks"
+  vpc_id      = module.vpc.vpc_id
+
   egress_rules = ["all-all"]
 }
 
@@ -84,5 +94,5 @@ module "image_batch_processor" {
   datasync_task_arn = "arn:aws:datasync:ap-southeast-2:977938986999:task/task-04ec35fc603ecc170"
 
   private_subnets        = module.vpc.private_subnets
-  vpc_security_group_ids = [module.vpc.default_security_group_id]
+  vpc_security_group_ids = [module.batch_sg.security_group_id]
 }
