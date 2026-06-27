@@ -4,6 +4,7 @@ import os
 import sys
 from collections import defaultdict
 from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 from typing import List
 
@@ -130,7 +131,10 @@ def main():
                 "processed_at": datetime.now(timezone.utc).isoformat(),
                 "has_defect": db_summary.has_defect,
                 "total_defect_count": db_summary.total_defect_count,
-                "defects": [d.model_dump() for d in db_summary.defects],
+                "defects": [
+                    {**d.model_dump(), "highest_confidence": Decimal(str(d.highest_confidence))}
+                    for d in db_summary.defects
+                ],
             })
             print(f"Written to DynamoDB: {s3_key}")
             
