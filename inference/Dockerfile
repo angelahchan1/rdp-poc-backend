@@ -16,7 +16,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY poetry.lock pyproject.toml ./
-RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 RUN poetry install --no-interaction --no-ansi --no-root
 
 COPY ./app /app 
