@@ -82,6 +82,11 @@ module "vpc_endpoints" {
 # }
 
 
+module "inference_results_db" {
+  source     = "../../modules/dynamodb"
+  table_name = "${local.project_prefix}-inference-results"
+}
+
 module "image_batch_processor" {
   source          = "../../modules/batch"
   project_prefix  = local.project_prefix
@@ -89,9 +94,11 @@ module "image_batch_processor" {
   region_id       = local.region_id
   repository_name = local.repository_name
 
-  source_bucket_arn = "arn:aws:s3:::rdp-dev-datasync-destination"
-  source_bucket_id  = "rdp-dev-datasync-destination"
-  datasync_task_arn = "arn:aws:datasync:ap-southeast-2:977938986999:task/task-04ec35fc603ecc170"
+  source_bucket_arn   = "arn:aws:s3:::rdp-dev-datasync-destination"
+  source_bucket_id    = "rdp-dev-datasync-destination"
+  datasync_task_arn   = "arn:aws:datasync:ap-southeast-2:977938986999:task/task-04ec35fc603ecc170"
+  dynamodb_table_name = module.inference_results_db.table_name
+  dynamodb_table_arn  = module.inference_results_db.table_arn
 
   private_subnets        = module.vpc.private_subnets
   vpc_security_group_ids = [module.batch_sg.security_group_id]

@@ -3,6 +3,7 @@ import json
 import os
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
@@ -50,6 +51,8 @@ def main():
         sys.exit(0)
 
     s3_client = boto3.client("s3")
+    dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(os.environ.get("DYNAMODB_TABLE_NAME", "rdp-dev-inference-results"))
     
     if not os.path.exists(LOCAL_WEIGHTS_PATH):
         print(f"Downloading model weights from S3: s3://{bucket_name}/models/rail_defect_yolov11_weights.pt...")
@@ -121,6 +124,15 @@ def main():
             )
 
             print(f"Inference summary for {s3_key}: {db_summary.model_dump_json(indent=2)}")
+
+            table.put_item(Item={
+                "image_key": s3_key,
+                "processed_at": datetime.now(timezone.utc).isoformat(),
+                "has_defect": db_summary.has_defect,
+                "total_defect_count": db_summary.total_defect_count,
+                "defects": [d.model_dump() for d in db_summary.defects],
+            })
+            print(f"Written to DynamoDB: {s3_key}")
             
         except Exception as e:
             print(f"Failed to process image {s3_key}. Error: {e}")

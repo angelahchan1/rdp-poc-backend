@@ -78,6 +78,10 @@ module "step_function" {
                     {
                       Name      = "BATCH_FILES"
                       "Value.$" = "States.JsonToString($)"
+                    },
+                    {
+                      Name  = "DYNAMODB_TABLE_NAME"
+                      Value = var.dynamodb_table_name
                     }
                   ]
                 }
@@ -210,6 +214,11 @@ module "batch_job_role" {
       effect    = "Allow"
       actions   = ["s3:GetObject", "s3:PutObject"]
       resources = ["${var.source_bucket_arn}/*"]
+    },
+    {
+      effect    = "Allow"
+      actions   = ["dynamodb:PutItem"]
+      resources = [var.dynamodb_table_arn]
     }
   ]
 }

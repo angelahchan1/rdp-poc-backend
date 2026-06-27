@@ -18,3 +18,13 @@ variable "datasync_task_arn" {
   type = string
 }
 
+variable "dynamodb_table_name" {
+  type        = string
+  description = "Name of the DynamoDB table to write inference results to"
+}
+
+variable "dynamodb_table_arn" {
+  type        = string
+  description = "ARN of the DynamoDB table to write inference results to"
+}
+
