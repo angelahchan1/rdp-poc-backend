@@ -1,5 +1,5 @@
 [project]
-name = "rail_defect_poc_api"
+name = "inference"
 version = "0.1.0"
 package-mode = false
 description = "Backend for rail defect POC"
